@@ -20,18 +20,14 @@ module.exports = function (sequelize) {
       allowNull: false
     },
     status: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM,
       allowNull: false,
-      validate: {
-        isIn: [['open', 'closed']]
-      },
-      defaultValue: 'open'
+      values: ['OPEN', 'CLOSED'],
+      defaultValue: 'OPEN'
     },
     priority: {
-      type: DataTypes.STRING,
-      validate: {
-        isIn: [['low', 'medium', 'high', 'immediate']]
-      }
+      type: DataTypes.ENUM,
+      values: ['LOW', 'MEDIUM', 'HIGH', 'IMMEDIATE'],
     },
     targetResolutionDate: {
       type: DataTypes.DATEONLY
