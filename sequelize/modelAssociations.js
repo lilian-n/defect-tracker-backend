@@ -30,12 +30,16 @@ const associateModels = (sequelize) => {
   Defect.belongsTo(User, {
     as: 'identifier',
     foreignKey: {
+      name: 'identifierId',
       allowNull: false
     }
   })
 
   Defect.belongsTo(User, {
-    as: 'assignedDeveloper'
+    as: 'assignedDev',
+    foreignKey: {
+      name: 'assignedDevId'
+    }
   })
 }
 
