@@ -6,7 +6,6 @@ module.exports = function (sequelize) {
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true
     },
     firstName: {
@@ -28,7 +27,7 @@ module.exports = function (sequelize) {
     },
     role: {
       type: DataTypes.ENUM,
-      values: ['ADMIN', 'PROJECT_LEAD', 'PROJECT_MEMBER']
+      values: ['ADMIN', 'PROJECT LEAD', 'PROJECT MEMBER']
     },
     email: {
       type: DataTypes.STRING,
