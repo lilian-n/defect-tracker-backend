@@ -9,14 +9,14 @@ const requestLogger = (request, response, next) => {
 }
 
 const convertToDate = (dateString) => {
-  // dateString should be in format 'mm,dd,yyyy'
+  // dateString should be in format 'yyyy-mm-dd'
   if (!dateString) {
     return null
   }
 
-  const month = Number(dateString.slice(0, 2)) - 1
-  const day = Number(dateString.slice(3, 5))
-  const year = Number(dateString.slice(6, 10))
+  const year = Number(dateString.slice(0, 4))
+  const month = Number(dateString.slice(5, 7)) - 1
+  const day = Number(dateString.slice(8, 10))
 
   return new Date(year, month, day)
 }
