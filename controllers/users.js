@@ -1,16 +1,18 @@
-const { models } = require('../../sequelize')
-const { getIdParam } = require('../helper')
+const usersRouter = require('express').Router()
+const { models } = require('../sequelize')
+const { getIdParam } = require('../helpers')
 
-const getAll = async (request, response) => {
+
+usersRouter.get('/', async (request, response) => {
   const users = await models.User.findAll({
     attributes: {
       exclude: ['createdAt', 'updatedAt']
     }
   })
   response.json(users)
-}
+})
 
-const getById = async (request, response) => {
+usersRouter.get('/:id', async (request, response) => {
   const id = getIdParam(request)
   const user = await models.User.findOne({
     where: {
@@ -22,9 +24,9 @@ const getById = async (request, response) => {
   })
 
   response.json(user)
-}
+})
 
-const create = async (request, response) => {
+usersRouter.post('/', async (request, response) => {
   const body = request.body
 
   const newUser = {
@@ -38,9 +40,9 @@ const create = async (request, response) => {
 
   const postedUser = await models.User.create(newUser)
   response.json(postedUser)
-}
+})
 
-const update = (request, response, next) => {
+usersRouter.put('/:id', (request, response, next) => {
   const id = getIdParam(request)
   const body = request.body
 
@@ -66,9 +68,9 @@ const update = (request, response, next) => {
   } else {
     response.status(400).send(`Bad request: id(${id}) does not match body id(${body.id})`)
   }
-}
+})
 
-const remove = async (request, response) => {
+usersRouter.delete('/:id', async (request, response) => {
   const id = getIdParam(request)
   await models.User.destroy({
     where: {
@@ -76,12 +78,6 @@ const remove = async (request, response) => {
     }
   })
   response.status(204).end()
-}
+})
 
-module.exports = {
-  getAll,
-  getById,
-  create,
-  update,
-  remove
-}
+module.exports = usersRouter

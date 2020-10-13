@@ -1,18 +1,18 @@
-const { models } = require('../../sequelize')
-const { getIdParam } = require('../helper')
-const { convertToDate } = require('../../utils/middleware')
+const projectsRouter = require('express').Router()
+const { models } = require('../sequelize')
+const helpers = require('../helpers')
 
-const getAll = async (request, response) => {
+projectsRouter.get('/', async (request, response) => {
   const projects = await models.Project.findAll({
     attributes: {
       exclude: ['createdAt', 'updatedAt']
     }
   })
   response.json(projects)
-}
+})
 
-const getById = async (request, response) => {
-  const id = getIdParam(request)
+projectsRouter.get('/:id', async (request, response) => {
+  const id = helpers.etIdParam(request)
   const project = await models.Project.findOne({
     where: {
       projectId: id
@@ -25,7 +25,7 @@ const getById = async (request, response) => {
     },
     {
       model: models.Defect,
-      include: [{ model: models.User, as: 'assignedDeveloper' }],
+      include: [{ as: 'assignedDev', model: models.User }],
       attributes: ['defectId', 'summary', 'status']
     }],
     attributes: {
@@ -33,11 +33,11 @@ const getById = async (request, response) => {
     }
   })
   response.json(project)
-}
+})
 
-const create = async (request, response) => {
+projectsRouter.post('/', async (request, response) => {
   const body = request.body
-  const targetEndDate = convertToDate(body.targetEndDate)
+  const targetEndDate = helpers.convertToDate(body.targetEndDate)
 
   const newProject = {
     projectName: body.projectName,
@@ -47,16 +47,16 @@ const create = async (request, response) => {
 
   const savedProject = await models.Project.create(newProject)
   response.json(savedProject)
-}
+})
 
-const update = (request, response, next) => {
-  const id = getIdParam(request)
+projectsRouter.put('/:id', (request, response, next) => {
+  const id = helpers.getIdParam(request)
   const body = request.body
 
   if (body.id === id) {
-    const startDate = convertToDate(body.startDate)
-    const targetEndDate = convertToDate(body.targetEndDate)
-    const actualEndDate = convertToDate(body.actualEndDate)
+    const startDate = helpers.convertToDate(body.startDate)
+    const targetEndDate = helpers.convertToDate(body.targetEndDate)
+    const actualEndDate = helpers.convertToDate(body.actualEndDate)
 
     const updateValues = {
       projectName: body.projectName,
@@ -77,22 +77,16 @@ const update = (request, response, next) => {
   } else {
     response.status(400).send(`Bad request: id (${id}) does not match body id (${body.id})`)
   }
-}
+})
 
-const remove = async (request, response) => {
-  const id = getIdParam(request)
+projectsRouter.delete('/:id', async (request, response) => {
+  const id = helpers.getIdParam(request)
   await models.Project.destroy({
     where: {
       projectId: id
     }
   })
   response.status(204).end()
-}
+})
 
-module.exports = {
-  getAll,
-  getById,
-  create,
-  update,
-  remove
-}
+module.exports = projectsRouter
