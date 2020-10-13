@@ -1,4 +1,18 @@
 const logger = require('./logger')
+const jwt = require('express-jwt')
+const jwks = require('jwks-rsa')
+
+const jwtCheck = jwt({
+  secret: jwks.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: 'https://defect-tracker.us.auth0.com/.well-known/jwks.json'
+  }),
+  audience: 'defect-tracker/api',
+  issuer: 'https://defect-tracker.us.auth0.com/',
+  algorithms: ['RS256']
+})
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
@@ -6,19 +20,6 @@ const requestLogger = (request, response, next) => {
   logger.info('Body:  ', request.body)
   logger.info('---')
   next()
-}
-
-const convertToDate = (dateString) => {
-  // dateString should be in format 'yyyy-mm-dd'
-  if (!dateString) {
-    return null
-  }
-
-  const year = Number(dateString.slice(0, 4))
-  const month = Number(dateString.slice(5, 7)) - 1
-  const day = Number(dateString.slice(8, 10))
-
-  return new Date(year, month, day)
 }
 
 const unknownEndpoint = (request, response) => {
@@ -58,8 +59,8 @@ const errorHandler = (error, request, response, next) => {
 }
 
 module.exports = {
+  jwtCheck,
   requestLogger,
   unknownEndpoint,
-  errorHandler,
-  convertToDate
+  errorHandler
 }
