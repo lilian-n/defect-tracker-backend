@@ -2,3 +2,4 @@ node_modules
 seeder.js
 requests
 .env
+tokenGenerator.js
