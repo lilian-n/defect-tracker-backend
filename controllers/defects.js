@@ -2,6 +2,7 @@ const defectsRouter = require('express').Router()
 const { models } = require('../sequelize')
 const helpers = require('../helpers')
 
+
 defectsRouter.get('/', async (request, response) => {
   const defects = await models.Defect.findAll({
     attributes: {
@@ -91,5 +92,16 @@ defectsRouter.put('/:id', async (request, response, next) => {
   }
 })
 
+defectsRouter.delete('/:id', async (request, response) => {
+  const id = helpers.getIdParam(request)
+
+  await models.Defect.destroy({
+    where: {
+      defectId: id
+    }
+  })
+
+  response.status(204).end()
+})
 
 module.exports = defectsRouter
