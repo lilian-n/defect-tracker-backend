@@ -13,6 +13,7 @@ app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 app.use(middleware.requestLogger)
+
 app.use('/api', middleware.jwtCheck)
 
 app.use('/api/projects', projectsRouter)
