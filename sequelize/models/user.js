@@ -6,6 +6,12 @@ module.exports = function (sequelize) {
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    auth0Id: {
+      type: DataTypes.TEXT,
+      allowNull: false,
       primaryKey: true
     },
     firstName: {
