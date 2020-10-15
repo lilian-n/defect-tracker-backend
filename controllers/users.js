@@ -2,6 +2,21 @@ const usersRouter = require('express').Router()
 const { models } = require('../sequelize')
 const { getIdParam } = require('../helpers')
 
+const isAdmin = async (auth0Id) => {
+  const user = await models.User.findOne({
+    where: {
+      auth0Id: auth0Id
+    }
+  })
+
+  const role = user.role
+
+  if (role === 'ADMIN') {
+    return true
+  }
+
+  return false
+}
 
 usersRouter.get('/', async (request, response) => {
   const users = await models.User.findAll({
@@ -29,7 +44,12 @@ usersRouter.get('/:id', async (request, response) => {
 usersRouter.post('/', async (request, response) => {
   const body = request.body
 
+  if (!(await isAdmin(auth0Id))) {
+    response.status(400).send(`User is not authorized to add new user`)
+  }
+
   const newUser = {
+    auth0Id: body.auth0Id,
     firstName: body.firstName,
     lastName: body.lastName,
     role: body.role,
@@ -42,9 +62,13 @@ usersRouter.post('/', async (request, response) => {
   response.json(postedUser)
 })
 
-usersRouter.put('/:id', (request, response, next) => {
+usersRouter.put('/:id', async (request, response, next) => {
   const id = getIdParam(request)
   const body = request.body
+
+  if (!(await isAdmin(auth0Id))) {
+    response.status(400).send(`Not authorized to update user`)
+  }
 
   if (body.id === id) {
     const updateValues = {
@@ -72,6 +96,11 @@ usersRouter.put('/:id', (request, response, next) => {
 
 usersRouter.delete('/:id', async (request, response) => {
   const id = getIdParam(request)
+
+  if (!(await isAdmin(auth0Id))) {
+    response.status(400).send(`Not authorized to update user`)
+  }
+
   await models.User.destroy({
     where: {
       userId: id
