@@ -1,6 +1,7 @@
 const logger = require('./logger')
 const jwt = require('express-jwt')
 const jwks = require('jwks-rsa')
+const config = require('./config')
 
 const jwtCheck = jwt({
   secret: jwks.expressJwtSecret({
@@ -9,8 +10,8 @@ const jwtCheck = jwt({
     jwksRequestsPerMinute: 5,
     jwksUri: 'https://defect-tracker.us.auth0.com/.well-known/jwks.json'
   }),
-  audience: 'defect-tracker/api',
-  issuer: 'https://defect-tracker.us.auth0.com/',
+  audience: config.AUTH0_AUDIENCE,
+  issuer: config.AUTH0_ISSUER_URL,
   algorithms: ['RS256']
 })
 
