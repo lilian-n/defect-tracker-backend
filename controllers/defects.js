@@ -115,11 +115,11 @@ defectsRouter.put('/:id', async (request, response, next) => {
         assignedDevId: body.assignedDevId,
       }
 
-      models.Defect
-        .update(updateValues, {
-          returning: true,
-          where: { id }
-        })
+      models.Defect.setRevisingAuthor(submitter.id)
+      models.Defect.update(updateValues, {
+        returning: true,
+        where: { id }
+      })
         .then(function ([rowsUpdate, [updatedDefect]]) {
           response.json(updatedDefect.toJSON())
         })

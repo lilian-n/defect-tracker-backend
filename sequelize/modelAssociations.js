@@ -1,3 +1,5 @@
+const sequelizeHistory = require('sequelize-history')
+
 const associateModels = (sequelize) => {
   const { Project, User, Defect, Comment } = sequelize.models
 
@@ -72,6 +74,16 @@ const associateModels = (sequelize) => {
       name: 'authorId',
       allowNull: false
     }
+  })
+
+  sequelizeHistory(Project, sequelize, {
+    authorFieldName: "authorId",
+    excludedAttributes: ["createdAt", "updatedAt"]
+  })
+
+  sequelizeHistory(Defect, sequelize, {
+    authorFieldName: "authorId",
+    excludedAttributes: ["createdAt", "updatedAt"]
   })
 }
 
