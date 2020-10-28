@@ -2,16 +2,20 @@ const { DataTypes } = require('sequelize')
 
 module.exports = function (sequelize) {
   const Project = sequelize.define('Project', {
-    projectId: {
+    id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       autoIncrement: true,
       primaryKey: true
     },
-    projectName: {
+    title: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     startDate: {
       type: DataTypes.DATEONLY,
@@ -26,9 +30,15 @@ module.exports = function (sequelize) {
       allowNull: true,
     }
   }, {
-    underscored: true,
     tableName: 'projects'
   })
+
+  Project.prototype.toJSON = function () {
+    const values = Object.assign({}, this.get())
+    delete values.createdAt
+    delete values.updatedAt
+    return values
+  }
 
   return Project
 }

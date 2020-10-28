@@ -1,9 +1,8 @@
 const { DataTypes } = require('sequelize')
 
-
 module.exports = function (sequelize) {
   const User = sequelize.define('User', {
-    userId: {
+    id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
@@ -14,22 +13,9 @@ module.exports = function (sequelize) {
       allowNull: false,
       primaryKey: true
     },
-    firstName: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    lastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    fullName: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        return `${this.firstName} ${this.lastName}`;
-      },
-      set(value) {
-        throw new Error('Do not try to set the `fullName` value!');
-      }
     },
     role: {
       type: DataTypes.ENUM,
@@ -51,15 +37,22 @@ module.exports = function (sequelize) {
     tableName: 'users',
     validate: {
       ifRoleRequiresProject() {
-        if ((this.role !== 'ADMIN') && (this.assignedProject === null)) {
+        if ((this.role !== 'ADMIN') && (this.projectId === null)) {
           throw new Error(`A project needs to be assigned with ${this.role} role`)
         }
-        if ((this.role === 'ADMIN') && (this.assignedProject !== null)) {
+        if ((this.role === 'ADMIN') && (this.projectId !== null)) {
           throw new Error(`A project cannot be assigned with ${this.role} role`)
         }
       },
-    }
+    },
   })
+
+  User.prototype.toJSON = function () {
+    const values = Object.assign({}, this.get())
+    delete values.createdAt
+    delete values.updatedAt
+    return values
+  }
 
   return User
 }

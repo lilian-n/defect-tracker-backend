@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize')
 
 module.exports = function (sequelize) {
   const Defect = sequelize.define('Defect', {
-    defectId: {
+    id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       autoIncrement: true,
@@ -15,7 +15,7 @@ module.exports = function (sequelize) {
     description: {
       type: DataTypes.TEXT
     },
-    identifiedDate: {
+    dateIdentified: {
       type: DataTypes.DATEONLY,
       allowNull: false
     },
@@ -27,12 +27,12 @@ module.exports = function (sequelize) {
     },
     priority: {
       type: DataTypes.ENUM,
-      values: ['LOW', 'MEDIUM', 'HIGH', 'IMMEDIATE'],
+      values: ['', 'Low', 'Medium', 'High', 'Immediate'],
     },
-    targetResolutionDate: {
+    targetResDate: {
       type: DataTypes.DATEONLY
     },
-    actualResolutionDate: {
+    actualResDate: {
       type: DataTypes.DATEONLY
     },
     progress: {
@@ -40,18 +40,17 @@ module.exports = function (sequelize) {
     },
     resolutionSummary: {
       type: DataTypes.TEXT
-    },
-    createdBy: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    updatedBy: {
-      type: DataTypes.STRING,
-      allowNull: false
     }
   }, {
     tableName: 'defects'
   })
+
+  Defect.prototype.toJSON = function () {
+    const values = Object.assign({}, this.get())
+    delete values.createdAt
+    delete values.updatedAt
+    return values
+  }
 
   return Defect
 }
