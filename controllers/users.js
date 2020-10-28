@@ -31,35 +31,34 @@ usersRouter.get('/:id', async (request, response) => {
   const id = getIdParam(request)
   const user = await models.User.findOne({
     where: {
-      userId: id
+      id: id
     },
     attributes: {
       exclude: ['createdAt', 'updatedAt']
     }
   })
-
-  response.json(user)
+  response.json(user.toJSON())
 })
 
 usersRouter.post('/', async (request, response) => {
   const body = request.body
 
-  if (!(await isAdmin(auth0Id))) {
-    response.status(400).send(`User is not authorized to add new user`)
-  }
+  // if (!(await isAdmin(auth0Id))) {
+  //   response.status(400).send(`User is not authorized to add new user`)
+  // }
 
   const newUser = {
     auth0Id: body.auth0Id,
-    firstName: body.firstName,
-    lastName: body.lastName,
+    name: body.name,
     role: body.role,
     email: body.email,
     occupation: body.occupation,
-    assignedProject: body.assignedProject || null
+    projectId: body.projectId || null
   }
 
   const postedUser = await models.User.create(newUser)
-  response.json(postedUser)
+
+  response.json(postedUser.toJSON())
 })
 
 usersRouter.put('/:id', async (request, response, next) => {
@@ -72,18 +71,17 @@ usersRouter.put('/:id', async (request, response, next) => {
 
   if (body.id === id) {
     const updateValues = {
-      firstName: body.firstName,
-      lastName: body.lastName,
+      name: body.name,
       role: body.role,
       email: body.email,
       occupation: body.occupation,
-      assignedProject: body.assignedProject || null
+      projectId: body.projectId || null
     }
 
     models.User
       .update(updateValues, {
         returning: true,
-        where: { userId: id }
+        where: { id: id }
       })
       .then(function ([rowsUpdate, [updatedUser]]) {
         response.json(updatedUser)
@@ -97,13 +95,13 @@ usersRouter.put('/:id', async (request, response, next) => {
 usersRouter.delete('/:id', async (request, response) => {
   const id = getIdParam(request)
 
-  if (!(await isAdmin(auth0Id))) {
-    response.status(400).send(`Not authorized to update user`)
-  }
+  // if (!(await isAdmin(auth0Id))) {
+  //   response.status(400).send(`Not authorized to update user`)
+  // }
 
   await models.User.destroy({
     where: {
-      userId: id
+      id: id
     }
   })
   response.status(204).end()
