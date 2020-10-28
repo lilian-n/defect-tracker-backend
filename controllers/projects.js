@@ -3,30 +3,47 @@ const { models } = require('../sequelize')
 const helpers = require('../helpers')
 
 projectsRouter.get('/', async (request, response) => {
+  console.log(request.user)
   const projects = await models.Project.findAll({
     attributes: {
       exclude: ['createdAt', 'updatedAt']
-    }
+    },
+    include: [
+      {
+        as: 'users',
+        model: models.User,
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'projectId']
+        }
+      },
+      {
+        as: 'defects',
+        model: models.Defect,
+        attributes: ['id', 'summary', 'status']
+      }
+    ]
   })
   response.json(projects)
 })
 
 projectsRouter.get('/:id', async (request, response) => {
-  const id = helpers.etIdParam(request)
+  const id = helpers.getIdParam(request)
   const project = await models.Project.findOne({
     where: {
-      projectId: id
+      id: id
     },
     include: [{
+      as: 'users',
       model: models.User,
       attributes: {
-        exclude: ['createdAt', 'updatedAt', 'assignedProject']
+        exclude: ['createdAt', 'updatedAt', 'projectId']
       }
     },
     {
+      as: 'defects',
       model: models.Defect,
       include: [{ as: 'assignedDev', model: models.User }],
-      attributes: ['defectId', 'summary', 'status']
+      attributes: ['id', 'summary', 'status']
     }],
     attributes: {
       exclude: ['createdAt', 'updatedAt']
@@ -37,12 +54,12 @@ projectsRouter.get('/:id', async (request, response) => {
 
 projectsRouter.post('/', async (request, response) => {
   const body = request.body
-  const targetEndDate = helpers.convertToDate(body.targetEndDate)
 
   const newProject = {
-    projectName: body.projectName,
-    startDate: new Date(),
-    targetEndDate
+    title: body.title,
+    description: body.description,
+    startDate: body.startDate || new Date(),
+    targetEndDate: body.targetEndDate || new Date()
   }
 
   const savedProject = await models.Project.create(newProject)
@@ -54,21 +71,18 @@ projectsRouter.put('/:id', (request, response, next) => {
   const body = request.body
 
   if (body.id === id) {
-    const startDate = helpers.convertToDate(body.startDate)
-    const targetEndDate = helpers.convertToDate(body.targetEndDate)
-    const actualEndDate = helpers.convertToDate(body.actualEndDate)
-
     const updateValues = {
-      projectName: body.projectName,
-      startDate,
-      targetEndDate,
-      actualEndDate
+      title: body.title,
+      description: body.description,
+      startDate: body.startDate,
+      targetEndDate: body.targetEndDate,
+      actualEndDate: body.actualEndDate
     }
 
     models.Project
       .update(updateValues, {
         returning: true,
-        where: { projectId: id }
+        where: { id: id }
       })
       .then(function ([rowsUpdate, [updatedProject]]) {
         response.json(updatedProject)
@@ -83,7 +97,7 @@ projectsRouter.delete('/:id', async (request, response) => {
   const id = helpers.getIdParam(request)
   await models.Project.destroy({
     where: {
-      projectId: id
+      id: id
     }
   })
   response.status(204).end()
