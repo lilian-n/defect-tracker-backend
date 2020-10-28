@@ -12,13 +12,13 @@ const isAssociatedWithDefect = async (user, defectId) => {
   const identifier = defect.identifierId
   const assignedDev = defect.assignedDevId
 
-  if (user.userId === identifier) {
+  if (user.id === identifier) {
     return true
   }
-  if (user.userId === assignedDev) {
+  if (user.id === assignedDev) {
     return true
   }
-  if ((user.role === 'PROJECT LEAD') && (user.assignedProject === defectProject)) {
+  if ((user.role === 'PROJECT LEAD') && (user.projectId === defectProject)) {
     return true
   }
   return false
@@ -28,7 +28,14 @@ defectsRouter.get('/', async (request, response) => {
   const defects = await models.Defect.findAll({
     attributes: {
       exclude: ['createdAt', 'updatedAt']
-    }
+    },
+    include: [
+      {
+        as: 'comments',
+        model: models.Comment,
+        attributes: ['id', 'content', 'authorId']
+      }
+    ]
   })
   response.json(defects)
 })
@@ -37,79 +44,84 @@ defectsRouter.get('/:id', async (request, response) => {
   const id = helpers.getIdParam(request)
 
   const defect = await models.Defect.findOne({
-    where: { defectId: id },
+    where: { id },
     attributes: {
       exclude: ['createdAt', 'updatedAt']
     },
-    include: [{
-      as: 'identifier',
-      model: models.User,
-      attributes: ['auth0Id', 'firstName', 'lastName', 'fullName']
-    },
-    {
-      as: 'assignedDev',
-      model: models.User,
-      attributes: ['auth0Id', 'firstName', 'lastName', 'fullName']
-    }]
+    include: [
+      {
+        as: 'comments',
+        model: models.Comment,
+        attributes: ['id', 'content', 'authorId']
+      }
+    ]
   })
 
   response.json(defect)
 })
 
 defectsRouter.post('/', async (request, response) => {
+  const auth0Id = request.user.sub
   const body = request.body
-  const submitter = await models.User.findByPk(body.submitterId)
 
-  if (isLeadOrMember(submitter) && (submitter.assignedProject !== body.projectId)) {
+  const submitter = await models.User.findOne({
+    where: {
+      auth0Id
+    }
+  })
+
+  if (isLeadOrMember(submitter) && (submitter.projectId !== body.projectId)) {
     response.status(400).send(`This user does not have permission to post defects to this project`)
   } else {
     const newDefect = {
       summary: body.summary,
-      description: body.description || null,
-      identifiedDate: new Date(),
-      priority: body.priority || null,
-      targetResolutionDate: helpers.convertToDate(body.targetResolutionDate),
-      progress: body.progress || null,
-      identifierId: body.submitterId,
+      description: body.description || "",
+      dateIdentified: body.dateIdentified || new Date(),
+      priority: body.priority || "",
+      targetResDate: body.targetResDate || null,
+      progress: body.progress || "",
+      identifierId: submitter.id,
       projectId: body.projectId,
-      createdBy: submitter.fullName,
-      updatedBy: submitter.fullName
     }
 
     const savedDefect = await models.Defect.create(newDefect)
-    response.json(savedDefect)
+    response.json(savedDefect.toJSON())
   }
 })
 
 defectsRouter.put('/:id', async (request, response, next) => {
+  const auth0Id = request.user.sub
   const id = helpers.getIdParam(request)
   const body = request.body
 
   if (body.id === id) {
-    const submitter = await models.User.find(body.submitterId)
+    const submitter = await models.User.findOne({
+      where: {
+        auth0Id
+      }
+    })
 
     if (await isAssociatedWithDefect(submitter, id)) {
       const updateValues = {
         summary: body.summary,
         description: body.description,
         status: body.status,
-        identifiedDate: helpers.convertToDate(body.identifiedDate),
+        dateIdentified: body.dateIdentified,
         priority: body.priority,
-        targetResolutionDate: helpers.convertToDate(body.targetResolutionDate),
-        actualResolutionDate: body.actualResolutionDate,
+        targetResDate: body.targetResDate,
+        actualResDate: body.actualResDate,
         progress: body.progress,
         resolutionSummary: body.resolutionSummary,
         assignedDevId: body.assignedDevId,
-        updatedBy: submitter.fullName
       }
 
       models.Defect
         .update(updateValues, {
           returning: true,
-          where: { defectId: id }
+          where: { id }
         })
         .then(function ([rowsUpdate, [updatedDefect]]) {
-          response.json(updatedDefect)
+          response.json(updatedDefect.toJSON())
         })
         .catch(next)
     } else {
@@ -126,7 +138,7 @@ defectsRouter.delete('/:id', async (request, response) => {
   if (await isAssociatedWithDefect(submitter, id))
     await models.Defect.destroy({
       where: {
-        defectId: id
+        id: id
       }
     })
 
