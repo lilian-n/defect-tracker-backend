@@ -11,7 +11,8 @@ const sequelize = new Sequelize(config.DB_NAME, config.DB_USERNAME, config.DB_PA
 const modelDefiners = [
   require('./models/project'),
   require('./models/user'),
-  require('./models/defect')
+  require('./models/defect'),
+  require('./models/comment')
 ]
 
 for (const modelDefiner of modelDefiners) {

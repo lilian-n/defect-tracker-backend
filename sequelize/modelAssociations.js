@@ -1,26 +1,32 @@
 const associateModels = (sequelize) => {
-  const { Project, User, Defect } = sequelize.models
+  const { Project, User, Defect, Comment } = sequelize.models
 
   Project.hasMany(User, {
+    as: 'users',
     foreignKey: {
-      name: 'assignedProject'
+      name: 'projectId'
     }
   })
 
   User.belongsTo(Project, {
+    as: 'project',
     foreignKey: {
-      name: 'assignedProject'
+      name: 'projectId'
     }
   })
 
   Project.hasMany(Defect, {
+    as: 'defects',
     foreignKey: {
       name: 'projectId',
       allowNull: false
-    }
+    },
+    onDelete: 'CASCADE',
+    hooks: true
   })
 
   Defect.belongsTo(Project, {
+    as: 'project',
     foreignKey: {
       name: 'projectId',
       allowNull: false
@@ -39,6 +45,32 @@ const associateModels = (sequelize) => {
     as: 'assignedDev',
     foreignKey: {
       name: 'assignedDevId'
+    }
+  })
+
+  Defect.hasMany(Comment, {
+    as: 'comments',
+    foreignKey: {
+      name: 'defectId',
+      allowNull: false
+    },
+    onDelete: 'CASCADE',
+    hooks: true
+  })
+
+  Comment.belongsTo(Defect, {
+    as: 'defect',
+    foreignKey: {
+      name: 'defectId',
+      allowNull: false
+    }
+  })
+
+  Comment.belongsTo(User, {
+    as: 'author',
+    foreignKey: {
+      name: 'authorId',
+      allowNull: false
     }
   })
 }
