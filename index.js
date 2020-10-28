@@ -4,6 +4,7 @@ const logger = require('./utils/logger')
 const config = require('./utils/config')
 const sequelize = require('./sequelize')
 
+
 logger.info('Checking database connection...')
 sequelize.authenticate()
   .then(() => {
