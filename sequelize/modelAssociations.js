@@ -7,7 +7,8 @@ const associateModels = (sequelize) => {
     as: 'users',
     foreignKey: {
       name: 'projectId'
-    }
+    },
+    onDelete: 'SET NULL'
   })
 
   User.belongsTo(Project, {
@@ -74,16 +75,6 @@ const associateModels = (sequelize) => {
       name: 'authorId',
       allowNull: false
     }
-  })
-
-  sequelizeHistory(Project, sequelize, {
-    authorFieldName: "authorId",
-    excludedAttributes: ["createdAt", "updatedAt"]
-  })
-
-  sequelizeHistory(Defect, sequelize, {
-    authorFieldName: "authorId",
-    excludedAttributes: ["createdAt", "updatedAt"]
   })
 }
 
