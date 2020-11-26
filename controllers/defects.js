@@ -23,8 +23,6 @@ const isAssociatedWithDefect = (user, defect) => {
     return true
   }
 
-
-
   return false
 }
 
