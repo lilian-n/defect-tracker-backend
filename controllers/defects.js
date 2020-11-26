@@ -2,11 +2,11 @@ const defectsRouter = require('express').Router()
 const { models } = require('../sequelize')
 const helpers = require('../helpers')
 
-const isLeadOrMember = (user) => {
-  return (user.role === 'PROJECT LEAD') || (user.role === 'PROJECT MEMBER')
+function isAdmin(user) {
+  return user.role === 'ADMIN'
 }
 
-const isAssociatedWithDefect = (user, defect) => {
+function isAssociatedWithDefect(user, defect) {
   if (user.role === 'ADMIN') {
     return true
   }
@@ -30,8 +30,8 @@ defectsRouter.get('/', async (request, response) => {
   const auth0Id = request.user.sub
   const submitter = await models.User.findOne({ where: { auth0Id } })
 
-  if (submitter.role !== "ADMIN") {
-    return response.status(400).send("This user does not have permission to fetch defects.")
+  if (!isAdmin(submitter)) {
+    return response.status(400).send('This user does not have permission to fetch defects.')
   }
 
   const defects = await models.Defect.findAll({
@@ -68,8 +68,8 @@ defectsRouter.get('/:id', async (request, response) => {
     ]
   })
 
-  if (isLeadOrMember(submitter) && (submitter.projectId !== defect.projectId)) {
-    return response.status(400).send("This user does not have permission to view this defect.")
+  if ((!isAdmin(submitter)) && (submitter.projectId !== defect.projectId)) {
+    return response.status(400).send('This user does not have permission to view this defect.')
   }
 
   response.json(defect)
@@ -80,16 +80,11 @@ defectsRouter.get('/defects-by-project/:id', async (request, response) => {
   const auth0Id = request.user.sub
   const submitter = await models.User.findOne({ where: { auth0Id } })
 
-  if ((submitter.role !== "ADMIN") && (submitter.projectId !== projectId)) {
-    return response.status(400).send("This user does not have permission to view these defects.")
+  if ((!isAdmin(submitter)) && (submitter.projectId !== projectId)) {
+    return response.status(400).send('This user does not have permission to view these defects.')
   }
 
-  const defects = await models.Defect.findAll({
-    where: {
-      projectId: projectId
-    }
-  })
-
+  const defects = await models.Defect.findAll({ where: { projectId } })
   response.json(defects)
 })
 
@@ -98,8 +93,8 @@ defectsRouter.post('/', async (request, response) => {
   const body = request.body
   const submitter = await models.User.findOne({ where: { auth0Id } })
 
-  if (isLeadOrMember(submitter) && (submitter.projectId !== body.projectId)) {
-    return response.status(400).send(`This user does not have permission to post defects to this project`)
+  if ((!isAdmin(submitter)) && (submitter.projectId !== body.projectId)) {
+    return response.status(400).send('This user does not have permission to post defects to this project')
   }
 
   const newDefect = {
@@ -118,19 +113,19 @@ defectsRouter.post('/', async (request, response) => {
 })
 
 defectsRouter.put('/:id', async (request, response, next) => {
-  const auth0Id = request.user.sub
-  const defectId = helpers.getIdParam(request)
+  const id = helpers.getIdParam(request)
   const body = request.body
 
   if (body.id !== id) {
     return response.status(400).send(`Bad request: id(${id}) does not match body id(${body.id})`)
   }
 
-  const defect = await models.Defect.findByPk(defectId)
+  const auth0Id = request.user.sub
   const submitter = await models.User.findOne({ where: { auth0Id } })
+  const defect = await models.Defect.findByPk(id)
 
   if (!isAssociatedWithDefect(submitter, defect)) {
-    return response.status(400).send(`This user does not have permission to edit this defect.`)
+    return response.status(400).send('This user does not have permission to edit this defect.')
   }
 
   const updateValues = {
@@ -165,10 +160,10 @@ defectsRouter.delete('/:id', async (request, response) => {
   const defect = await models.Defect.findByPk(id)
 
   if (!isAssociatedWithDefect(submitter, defect)) {
-    return response.status(400).send("This user does not have permission to delete this defect.")
+    return response.status(400).send('This user does not have permission to delete this defect.')
   }
 
-  await models.Defect.destroy({ where: { id: id } })
+  await models.Defect.destroy({ where: { id } })
   response.status(204).end()
 })
 
