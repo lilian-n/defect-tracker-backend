@@ -81,7 +81,7 @@ projectsRouter.post('/', async (request, response) => {
   response.json(savedProject)
 })
 
-projectsRouter.put('/:id', (request, response, next) => {
+projectsRouter.put('/:id', async (request, response, next) => {
   const id = helpers.getIdParam(request)
   const body = request.body
 
