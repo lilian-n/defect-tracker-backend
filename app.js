@@ -22,7 +22,7 @@ app.use('/api/users', usersRouter)
 app.use('/api/defects', defectsRouter)
 app.use('/api/comments', commentsRouter)
 
-app.use(middleware.unknownEndpoint)
+// app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
 module.exports = app
