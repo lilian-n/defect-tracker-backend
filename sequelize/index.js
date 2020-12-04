@@ -6,11 +6,10 @@ let sequelize
 
 if (config.DATABASE_URL) {
   sequelize = new Sequelize(config.DATABASE_URL, {
-    dialect: 'postgres',
-    protocol: 'postgres',
-    port: match[4],
-    host: match[3],
-    logging: true
+    logging: false,
+    dialectOptions: {
+      ssl: true
+    }
   })
 } else {
   sequelize = new Sequelize(config.DB_NAME, config.DB_USERNAME, config.DB_PASSWORD, {
