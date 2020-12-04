@@ -2,14 +2,23 @@ const Sequelize = require('sequelize')
 const config = require('../utils/config')
 const { associateModels } = require('./modelAssociations')
 
-const sequelize = new Sequelize(config.DB_NAME, config.DB_USERNAME, config.DB_PASSWORD, {
-  host: 'localhost',
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: true
-  },
-  logging: config.LOGGING
-})
+let sequelize
+
+if (config.DATABASE_URL) {
+  sequelize = new Sequelize(config.DATABASE_URL, {
+    dialect: 'postgres',
+    protocol: 'postgres',
+    port: match[4],
+    host: match[3],
+    logging: true
+  })
+} else {
+  sequelize = new Sequelize(config.DB_NAME, config.DB_USERNAME, config.DB_PASSWORD, {
+    host: 'localhost',
+    dialect: 'postgres',
+    logging: config.LOGGING
+  })
+}
 
 const modelDefiners = [
   require('./models/project'),

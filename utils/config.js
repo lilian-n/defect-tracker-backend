@@ -6,6 +6,8 @@ let DB_USERNAME = process.env.DB_USERNAME
 let DB_PASSWORD = process.env.DB_PASSWORD
 let LOGGING = true
 
+let DATABASE_URL = process.env.DATABASE_URL
+
 let AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE
 let AUTH0_ISSUER_URL = process.env.AUTH0_ISSUER_URL
 
@@ -20,6 +22,7 @@ module.exports = {
   DB_USERNAME: DB_USERNAME,
   DB_PASSWORD: DB_PASSWORD,
   LOGGING,
+  DATABASE_URL,
   AUTH0_AUDIENCE,
   AUTH0_ISSUER_URL
 }
