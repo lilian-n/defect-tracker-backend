@@ -5,6 +5,9 @@ const { associateModels } = require('./modelAssociations')
 const sequelize = new Sequelize(config.DB_NAME, config.DB_USERNAME, config.DB_PASSWORD, {
   host: 'localhost',
   dialect: 'postgres',
+  dialectOptions: {
+    ssl: true
+  },
   logging: config.LOGGING
 })
 
