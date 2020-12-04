@@ -8,7 +8,10 @@ if (config.DATABASE_URL) {
   sequelize = new Sequelize(config.DATABASE_URL, {
     logging: false,
     dialectOptions: {
-      ssl: true
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     }
   })
 } else {
