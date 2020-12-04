@@ -10,11 +10,6 @@ const commentsRouter = require('./controllers/comments')
 
 const app = express()
 
-app.set('views', __dirname + '/views')
-app.set('view engine', 'jade')
-app.use(express.favicon())
-
-
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
