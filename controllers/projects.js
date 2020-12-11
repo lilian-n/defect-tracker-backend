@@ -63,7 +63,7 @@ projectsRouter.get('/:id', async (request, response) => {
 
 projectsRouter.post('/', async (request, response) => {
   const body = request.body
-  const auth0Id = user.request.sub
+  const auth0Id = request.user.sub
   const submitter = await models.User.findOne({ where: { auth0Id } })
 
   if (!isAdmin(submitter)) {
