@@ -89,7 +89,7 @@ projectsRouter.put('/:id', async (request, response, next) => {
     return response.status(400).send(`Bad request: id (${id}) does not match body id (${body.id})`)
   }
 
-  const auth0Id = user.request.sub
+  const auth0Id = request.user.sub
   const submitter = await models.User.findOne({ where: { auth0Id } })
 
   if (!isAdmin(submitter)) {
@@ -117,7 +117,7 @@ projectsRouter.put('/:id', async (request, response, next) => {
 
 projectsRouter.delete('/:id', async (request, response) => {
   const id = helpers.getIdParam(request)
-  const auth0Id = user.request.sub
+  const auth0Id = request.user.sub
   const submitter = await models.User.findOne({ where: { auth0Id } })
 
   if (!isAdmin(submitter)) {
