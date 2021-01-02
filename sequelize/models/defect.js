@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize')
+const moment = require('moment')
 
 module.exports = function (sequelize) {
   const Defect = sequelize.define('Defect', {
@@ -17,7 +18,11 @@ module.exports = function (sequelize) {
     },
     dateIdentified: {
       type: DataTypes.DATEONLY,
-      allowNull: false
+      allowNull: false,
+      get() {
+        const dateValue = this.getDataValue('dateIdentified')
+        return moment(dateValue).format('MM/DD/YYYY')
+      },
     },
     status: {
       type: DataTypes.ENUM,
@@ -30,10 +35,28 @@ module.exports = function (sequelize) {
       values: ['', 'Low', 'Medium', 'High', 'Immediate'],
     },
     targetResDate: {
-      type: DataTypes.DATEONLY
+      type: DataTypes.DATEONLY,
+      get() {
+        const dateValue = this.getDataValue('targetResDate')
+
+        if (!!dateValue) {
+          return moment(dateValue).format('MM/DD/YYYY')
+        } else {
+          return null
+        }
+      }
     },
     actualResDate: {
-      type: DataTypes.DATEONLY
+      type: DataTypes.DATEONLY,
+      get() {
+        const dateValue = this.getDataValue('actualResDate')
+
+        if (!!dateValue) {
+          return moment(dateValue).format('MM/DD/YYYY')
+        } else {
+          return null
+        }
+      }
     },
     progress: {
       type: DataTypes.TEXT
