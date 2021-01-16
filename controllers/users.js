@@ -49,6 +49,7 @@ usersRouter.get('/users-by-project/:id', async (request, response) => {
 
 usersRouter.post('/', async (request, response) => {
   const auth0Id = request.user.sub
+
   const body = request.body
 
   const newUser = {
