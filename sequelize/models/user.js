@@ -27,7 +27,16 @@ module.exports = function (sequelize) {
       unique: true,
       validate: {
         isEmail: true
-      }
+      },
+      get() {
+        const email = this.getDataValue('email')
+        let splitted = email.split('@')
+        let partOne = splitted[0];
+        let avg = partOne.length / 2;
+        partOne = partOne.substring(0, (partOne.length - avg));
+        partTwo = splitted[1];
+        return partOne + "...@" + partTwo;
+      },
     },
     occupation: {
       type: DataTypes.STRING,
