@@ -24,6 +24,13 @@ module.exports = function (sequelize) {
         return moment(dateValue).format('MM/DD/YYYY')
       },
     },
+    identifiedMonthYear: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const dateIdentified = this.dateIdentified;
+        return moment(dateIdentified).format("MMM YYYY");
+      }
+    },
     status: {
       type: DataTypes.ENUM,
       allowNull: false,
